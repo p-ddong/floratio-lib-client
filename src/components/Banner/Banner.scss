@@ -1,0 +1,35 @@
+.banner{
+    width: 100vw;
+    height: 100vh;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 50px;
+
+    color: rgb(255, 255, 255);
+    background-image: url('../../assest/img/scaled_image.jpg');
+    background-size: cover;                 
+    background-position: center;            
+    background-repeat: no-repeat;
+    
+    position: relative;
+    &::after{
+        position: absolute;
+        content: '';
+
+        top: 0px;
+        left: 0px;
+        right: 0px;
+        bottom: 0px;
+
+        background-color: rgba($color: #47a757, $alpha: 0.1);
+    }
+    .variable-proximity-demo{
+        padding: 20px;
+        background-color: rgba(117, 117, 117, 0.651);
+        z-index: 3;
+        cursor: pointer;
+    }
+}
