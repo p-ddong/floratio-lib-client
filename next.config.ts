@@ -1,7 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    domains: ["www.nparks.gov.sg"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "www.nparks.gov.sg",
+        pathname: "/**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

@@ -12,18 +12,24 @@ import {
 } from "react-icons/vsc";
 import { PiTreeBold } from "react-icons/pi";
 import Dock, { DockItemData } from "../Bits/Dock/Dock";
+import { useRouter } from "next/navigation";
+
 
 const Header = () => {
+  const router = useRouter();
+  const handleClick = (pushto:string) => {
+    router.push(pushto);
+  };
   const items: DockItemData[] = [
     {
       icon: <VscHome size={18} />,
       label: "Home",
-      onClick: () => alert("Home!"),
+      onClick: () => handleClick("/"),
     },
     {
       icon: <PiTreeBold size={18} />,
       label: "All Species",
-      onClick: () => alert("All Species!"),
+      onClick: () => handleClick("/plants"),
     },
     {
       icon: <VscAccount size={18} />,
@@ -53,10 +59,10 @@ const Header = () => {
       />
 
       <div className="user">
-        <Button className="button log" bgColor={"white"}>
+        <Button className="button log" bgColor={"white"} onClick={()=>handleClick('/login')}>
           Login
         </Button>
-        <Button className="button res" bgColor={"white"}>
+        <Button className="button res" bgColor={"white"} onClick={()=>handleClick('/register')}>
           Register
         </Button>
       </div>
