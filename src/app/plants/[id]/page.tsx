@@ -2,7 +2,7 @@ import React from 'react'
 
 const PlantDetail = () => {
   return (
-    <div>page</div>
+    <div>The information is in update</div>
   )
 }
 
