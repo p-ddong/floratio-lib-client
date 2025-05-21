@@ -1,108 +1,53 @@
 "use client";
 
 import { useMounted } from "@/hook/useMounted";
-import type { IconButtonProps, SpanProps } from "@chakra-ui/react";
-import { ClientOnly, IconButton, Skeleton, Span } from "@chakra-ui/react";
-import { ThemeProvider, useTheme } from "next-themes";
-import type { ThemeProviderProps } from "next-themes";
-import * as React from "react";
-import { LuMoon, LuSun } from "react-icons/lu";
+import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
+import { Button } from "@/components/ui/button";
+import { Sun, Moon } from "lucide-react";
+import type { ReactNode } from "react";
 
-export interface ColorModeProviderProps extends ThemeProviderProps {}
-
-export function ColorModeProvider(props: ColorModeProviderProps) {
-  const mounted = useMounted();
-  if (!mounted) return null;
-  return <ThemeProvider attribute="class" enableSystem={false} {...props} />;
+interface ColorModeProviderProps {
+  children: ReactNode;
 }
 
-export type ColorMode = "light" | "dark";
-
-export interface UseColorModeReturn {
-  colorMode: ColorMode;
-  setColorMode: (colorMode: ColorMode) => void;
-  toggleColorMode: () => void;
-}
-
-export function useColorMode(): UseColorModeReturn {
-  const { resolvedTheme, setTheme } = useTheme();
-  const toggleColorMode = () => {
-    setTheme(resolvedTheme === "dark" ? "light" : "dark");
-  };
-  return {
-    colorMode: resolvedTheme as ColorMode,
-    setColorMode: setTheme,
-    toggleColorMode,
-  };
-}
-
-export function useColorModeValue<T>(light: T, dark: T) {
-  const { colorMode } = useColorMode();
-  return colorMode === "dark" ? dark : light;
-}
-
-export function ColorModeIcon() {
-  const { colorMode } = useColorMode();
-  return colorMode === "dark" ? <LuMoon /> : <LuSun />;
-}
-
-interface ColorModeButtonProps extends Omit<IconButtonProps, "aria-label"> {}
-
-export const ColorModeButton = React.forwardRef<
-  HTMLButtonElement,
-  ColorModeButtonProps
->(function ColorModeButton(props, ref) {
-  const { toggleColorMode } = useColorMode();
+export function ColorModeProvider({ children }: ColorModeProviderProps) {
   return (
-    <ClientOnly fallback={<Skeleton boxSize="8" />}>
-      <IconButton
-        onClick={toggleColorMode}
-        variant="ghost"
-        aria-label="Toggle color mode"
-        size="sm"
-        ref={ref}
-        {...props}
-        css={{
-          _icon: {
-            width: "5",
-            height: "5",
-          },
-        }}
-      >
-        <ColorModeIcon />
-      </IconButton>
-    </ClientOnly>
+    <NextThemesProvider attribute="class" defaultTheme="system" enableSystem>
+      {children}
+    </NextThemesProvider>
   );
-});
+}
 
-export const LightMode = React.forwardRef<HTMLSpanElement, SpanProps>(
-  function LightMode(props, ref) {
-    return (
-      <Span
-        color="fg"
-        display="contents"
-        className="chakra-theme light"
-        colorPalette="gray"
-        colorScheme="light"
-        ref={ref}
-        {...props}
-      />
-    );
-  }
-);
+// Hook to access current color mode and setter
+export function useColorMode() {
+  const mounted = useMounted();
+  const { theme, setTheme } = useTheme();
 
-export const DarkMode = React.forwardRef<HTMLSpanElement, SpanProps>(
-  function DarkMode(props, ref) {
-    return (
-      <Span
-        color="fg"
-        display="contents"
-        className="chakra-theme dark"
-        colorPalette="gray"
-        colorScheme="dark"
-        ref={ref}
-        {...props}
-      />
-    );
+  if (!mounted) {
+    return { colorMode: undefined, setColorMode: () => {} };
   }
-);
+
+  const colorMode = theme === "dark" ? "dark" : "light";
+
+  return {
+    colorMode,
+    setColorMode: (mode: "light" | "dark") => setTheme(mode),
+  };
+}
+
+export function ColorModeToggle() {
+  const { colorMode, setColorMode } = useColorMode();
+  if (!colorMode) return null;
+
+  const isDark = colorMode === "dark";
+
+  return (
+    <Button
+      variant="ghost"
+      onClick={() => setColorMode(isDark ? "light" : "dark")}
+      aria-label="Toggle color mode"
+    >
+      {isDark ? <Sun size={18} /> : <Moon size={18} />}
+    </Button>
+  );
+}
