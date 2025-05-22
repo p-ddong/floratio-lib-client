@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Layout from "@/components/Layout";
+import ReduxProvider from "@/provider/ReduxProvider";
 
 export const metadata: Metadata = {
   title: "Floratio Lib",
@@ -22,8 +23,10 @@ export default function RootLayout({
   }
   return (
     <html lang="en">
-      <body>       
+      <body>
+        <ReduxProvider>
           <Layout>{children}</Layout>
+        </ReduxProvider>        
       </body>
     </html>
   );

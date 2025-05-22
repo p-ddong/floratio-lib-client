@@ -1,11 +1,13 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm ,Resolver } from "react-hook-form"
 import { z } from "zod"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
+import { jwtDecode } from "jwt-decode";
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,8 +15,13 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 
+import { useAppDispatch } from "@/store"                            
+import { setToken,setUser } from "@/store/authSlice"              
+import { login as loginService } from "@/services/auth.service" 
+import { JWTPayload } from "@/types"
+
 const loginFormSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }),
+  username: z.string().min(1, { message: "Username is required" }),
   password: z.string().min(8, { message: "Password must be at least 8 characters" }),
   rememberMe: z.boolean().default(false),
 })
@@ -25,10 +32,13 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
+  const dispatch = useAppDispatch()                                 
+  const router = useRouter()
+
   const form = useForm<LoginFormValues>({
   resolver: zodResolver(loginFormSchema) as Resolver<LoginFormValues>,
   defaultValues: {
-    email: "",
+    username: "",
     password: "",
     rememberMe: false,
   },
@@ -36,17 +46,39 @@ export default function LoginPage() {
 
   async function onSubmit(data: LoginFormValues) {
     setIsLoading(true)
+    try {
+      // 1. Gọi API đăng nhập, lấy access token
+      const token = await loginService(data.username, data.password)    
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+      // 2. Lưu token vào Redux và (nếu nhớ) localStorage
+      dispatch(setToken(token))                                    
+      if (data.rememberMe) {
+        localStorage.setItem("token", token)
+      }
 
-    console.log(data)
-    setIsLoading(false)
+      // 3. Decode payload từ token
+      const payload = jwtDecode<JWTPayload>(token)
+      
+      // 4. Dispatch thông tin user (sub là _id)
+      dispatch(
+        setUser({
+          _id: payload.sub,
+          username: payload.username,
+          email: "",          // nếu token không có email, bạn để rỗng hoặc fetch thêm
+          role: payload.role,
+          createdAt: "",      // nếu cần, bạn có thể bỏ qua hoặc fetch từ API
+          updatedAt: "",
+        })
+      )
 
-    // Here you would typically:
-    // 1. Send the data to your authentication API
-    // 2. Store the returned token
-    // 3. Redirect the user to the dashboard
+      // 4. Điều hướng về home
+      router.push("/")
+    } catch (err: any) {
+      // TODO: hiển thị toast hoặc error message
+      console.error("Login error:", err.message)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -54,19 +86,25 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Login</CardTitle>
-          <CardDescription>Enter your email and password to login to your account</CardDescription>
+          <CardDescription>
+            Enter your email and password to login to your account
+          </CardDescription>
         </CardHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardContent className="space-y-4 p-6">
               <FormField
                 control={form.control}
-                name="email"
+                name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Username</FormLabel>
                     <FormControl>
-                      <Input placeholder="example@example.com" type="email" {...field} />
+                      <Input
+                        placeholder="your-username"
+                        type="text"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -80,7 +118,11 @@ export default function LoginPage() {
                     <FormLabel>Password</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input placeholder="••••••••" type={showPassword ? "text" : "password"} {...field} />
+                        <Input
+                          placeholder="••••••••"
+                          type={showPassword ? "text" : "password"}
+                          {...field}
+                        />
                         <Button
                           type="button"
                           variant="ghost"
@@ -93,7 +135,9 @@ export default function LoginPage() {
                           ) : (
                             <Eye className="h-4 w-4 text-muted-foreground" />
                           )}
-                          <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
+                          <span className="sr-only">
+                            {showPassword ? "Hide password" : "Show password"}
+                          </span>
                         </Button>
                       </div>
                     </FormControl>
@@ -107,7 +151,10 @@ export default function LoginPage() {
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
                     <FormControl>
-                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel>Remember me</FormLabel>
@@ -116,7 +163,10 @@ export default function LoginPage() {
                 )}
               />
               <div className="text-sm text-right">
-                <Link href="/forgot-password" className="font-medium text-primary hover:text-primary/90">
+                <Link
+                  href="/forgot-password"
+                  className="font-medium text-primary hover:text-primary/90"
+                >
                   Forgot your password?
                 </Link>
               </div>
@@ -134,7 +184,10 @@ export default function LoginPage() {
               </Button>
               <div className="text-center text-sm">
                 Don&apos;t have an account?{" "}
-                <Link href="/register" className="font-medium text-primary hover:text-primary/90">
+                <Link
+                  href="/register"
+                  className="font-medium text-primary hover:text-primary/90"
+                >
                   Register
                 </Link>
               </div>
@@ -143,5 +196,5 @@ export default function LoginPage() {
         </Form>
       </Card>
     </div>
-  )
+  );
 }
