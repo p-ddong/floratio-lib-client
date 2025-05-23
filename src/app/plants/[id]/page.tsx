@@ -12,14 +12,17 @@ import { fetchPlantDetail } from "@/services/plant.service.server"
 import { PlantDetail } from "@/types/plant.types"
 
 interface PlantPageProps {
-  params: { id: string }
+  /** Next.js 15: params is now a Promise */
+  params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata({
   params,
 }: PlantPageProps): Promise<Metadata> {
+  /** Giải quyết Promise trước khi dùng */
+  const { id } = await params;
   try {
-    const plant = await fetchPlantDetail(params.id)
+    const plant = await fetchPlantDetail(id);
     if (!plant) throw new Error("Not found")
     return {
       title: `${plant.scientific_name} | Plant Library`,
@@ -34,6 +37,7 @@ export async function generateMetadata({
 }
 
 export default async function PlantDetailPage({ params }: PlantPageProps) {
+  const { id } = await params;
   return (
     <div className="p-8">
       {/* Back button */}
@@ -49,7 +53,7 @@ export default async function PlantDetailPage({ params }: PlantPageProps) {
       {/* Suspense: show skeleton trong khi chờ dữ liệu */}
       <Suspense fallback={<PlantDetailSkeleton />}>
         {/* PlantDetailContent là Server Component */}
-        <PlantDetailContent id={params.id} />
+        <PlantDetailContent id={id} />
       </Suspense>
     </div>
   )

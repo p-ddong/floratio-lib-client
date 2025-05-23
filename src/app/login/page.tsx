@@ -73,6 +73,7 @@ export default function LoginPage() {
 
       // 4. Điều hướng về home
       router.push("/")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       // TODO: hiển thị toast hoặc error message
       console.error("Login error:", err.message)
