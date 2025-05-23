@@ -5,9 +5,11 @@ import { CldImage, CldImageProps } from "next-cloudinary"
 import React from "react"
 
 export interface CloudImageProps extends Omit<CldImageProps, "width" | "height"> {
-  src: string
-  alt: string
+  src: string;
+  alt: string;
+  ratio?: `${number}/${number}`;
   className?: string
+  
 }
 
 export const CloudImage: React.FC<CloudImageProps> = ({
