@@ -40,7 +40,7 @@ export default async function ContributePage({
         </div>
 
         <Button asChild>
-          <Link href="/contribute/new" className="flex items-center">
+          <Link href="/contribute/create" className="flex items-center">
             <PlusCircle className="mr-2 h-4 w-4" />
             New Contribution
           </Link>

@@ -39,14 +39,17 @@ export function ContributionsList() {
 
   // apply filters
   let contributions: Contribution[] = list;
-  if (status !== "all") contributions = contributions.filter((c) => c.status === status);
-  if (type !== "all") contributions = contributions.filter((c) => (c.type ?? "new") === type);
-  if (q) {
-    contributions = contributions.filter((c) => {
-      const text = `${c.contribute_plant.scientific_name} ${c.user.username}`.toLowerCase();
-      return text.includes(q);
-    });
-  }
+/* ---------- apply filters ---------- */
+if (status !== "all") contributions = contributions.filter((c) => c.status === status);
+if (type   !== "all") contributions = contributions.filter((c) => c.type   === type);
+if (q) {
+  contributions = contributions.filter((c) => {
+    /* ★ scientific_name & username đến từ data.plant + c_user */
+    const text = `${c.data.plant.scientific_name} ${c.c_user.username}`.toLowerCase();
+    return text.includes(q);
+  });
+}
+
 
   if (loading) return <ContributionsListSkeleton />;
 
@@ -70,8 +73,8 @@ export function ContributionsList() {
           {/* ---------- IMAGE + BADGES ---------- */}
           <div className="relative h-48 w-full">
             <CloudImage
-              src={c.contribute_plant.image || "/placeholder.svg?height=200&width=400"}
-              alt={c.contribute_plant.scientific_name}
+              src={c.data.plant.images[0] || "/placeholder.svg?height=200&width=400"}
+              alt={c.data.plant.scientific_name}
               className="h-full w-full object-cover"
             />
 
@@ -84,7 +87,7 @@ export function ContributionsList() {
             {c.type && (
               <div className="absolute top-2 left-2">
                 <Badge variant="outline" className="bg-background/80 capitalize">
-                  {c.type === "new" ? "New Plant" : "Update"}
+                  {c.type === "create" ? "New Plant" : "Update"}
                 </Badge>
               </div>
             )}
@@ -93,28 +96,28 @@ export function ContributionsList() {
           {/* ---------- HEADER ---------- */}
           <CardHeader className="p-4 pb-0">
             <CardTitle className="text-lg font-bold italic">
-              {c.contribute_plant.scientific_name}
+              {c.data.plant.scientific_name}
             </CardTitle>
             <CardDescription>
-              {c.contribute_plant.common_name.slice(0, 2).join(", ")}
-              {c.contribute_plant.common_name.length > 2 && "..."}
+              {c.data.plant.common_name.slice(0, 2).join(", ")}
+              {c.data.plant.common_name.length > 2 && "..."}
             </CardDescription>
           </CardHeader>
 
           {/* ---------- CONTENT ---------- */}
           <CardContent className="p-4 pt-2 flex-grow">
             <p className="text-sm text-muted-foreground line-clamp-3">
-              {c.contribute_plant.description}
+              {c.data.plant.description}
             </p>
             <div className="flex flex-wrap gap-1 mt-3">
-              {c.contribute_plant.attributes.slice(0, 3).map((attr, i) => (
+              {c.data.plant.attributes.slice(0, 3).map((attr, i) => (
                 <Badge key={i} variant="secondary" className="text-xs">
                   {attr}
                 </Badge>
               ))}
-              {c.contribute_plant.attributes.length > 3 && (
+              {c.data.plant.attributes.length > 3 && (
                 <Badge variant="secondary" className="text-xs">
-                  +{c.contribute_plant.attributes.length - 3} more
+                  +{c.data.plant.attributes.length - 3} more
                 </Badge>
               )}
             </div>
@@ -123,7 +126,7 @@ export function ContributionsList() {
           {/* ---------- FOOTER ---------- */}
           <CardFooter className="p-4 pt-0 flex justify-between items-center text-sm border-t mt-auto">
             <div className="text-muted-foreground">
-              By <span className="font-medium">{c.user.username}</span> •{" "}
+              By <span className="font-medium">{c.c_user.username}</span> •{" "}
               {formatDistanceToNow(new Date(c.createdAt), { addSuffix: true })}
             </div>
             <Button variant="ghost" size="sm" asChild>
