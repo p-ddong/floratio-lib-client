@@ -70,11 +70,11 @@ export function ContributionFilters({ onChange }: ContributionFiltersProps) {
             All Types
           </Button>
           <Button
-            variant={type === "new" ? "default" : "outline"}
+            variant={type === "create" ? "default" : "outline"}
             size="sm"
             onClick={() => {
-              setType("new");
-              emit({ type: "new" });
+              setType("create");
+              emit({ type: "create" });
             }}
             className="flex-1 sm:flex-none"
           >

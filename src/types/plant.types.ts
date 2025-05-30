@@ -35,3 +35,19 @@ export interface Attribute {
   _id: string
   name: string
 }
+
+export interface PlantPaginationParams {
+  page?: number;          // 1-based
+  limit?: number;         // số item / trang
+  search?: string;        // chuỗi tìm kiếm
+  family?: string;        // _id của family
+  attributes?: string;    // các _id attribute, ngăn cách dấu phẩy
+}
+
+export interface PlantPaginationResponse {
+  page:        number;
+  pageSize:    number;
+  totalPages:  number;
+  totalItems:  number;
+  data:        PlantList[];
+}

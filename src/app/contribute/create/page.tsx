@@ -168,7 +168,7 @@ export default function CreateContributionPage() {
 
   if (previewMode) {
     return (
-      <div className="container py-8">
+      <div className="p-8">
         <div className="flex items-center justify-between mb-6">
           <Button variant="ghost" size="sm" onClick={() => setPreviewMode(false)} className="flex items-center">
             <ChevronLeft className="mr-2 h-4 w-4" />
@@ -237,7 +237,7 @@ export default function CreateContributionPage() {
   }
 
   return (
-    <div className="container py-8">
+    <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <Button variant="ghost" size="sm" asChild className="flex items-center">
           <Link href="/contribute">
@@ -296,7 +296,7 @@ export default function CreateContributionPage() {
                           </SelectContent>
                         </Select>
                         <FormDescription>
-                          Choose whether you're adding a new plant or updating information for an existing one
+                          {`Choose whether you're adding a new plant or updating information for an existing one`}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -415,8 +415,8 @@ export default function CreateContributionPage() {
 
                   <Alert>
                     <AlertDescription>
-                      <strong>Writing Tips:</strong> Include details about the plant's size, leaf shape, flower
-                      characteristics, native environment, and any special care requirements or interesting facts.
+                      <strong>Writing Tips:</strong> {`Include details about the plant's size, leaf shape, flower
+                      characteristics, native environment, and any special care requirements or interesting facts.`}
                     </AlertDescription>
                   </Alert>
                 </CardContent>
@@ -431,7 +431,7 @@ export default function CreateContributionPage() {
                         Plant Attributes
                       </label>
                       <p className="text-sm text-muted-foreground mb-4">
-                        Select or add attributes that describe this plant's characteristics and care requirements
+                       {` Select or add attributes that describe this plant's characteristics and care requirements`}
                       </p>
 
                       <div className="space-y-4">
@@ -542,8 +542,8 @@ export default function CreateContributionPage() {
                   <Alert>
                     <Upload className="h-4 w-4" />
                     <AlertDescription>
-                      <strong>Image Guidelines:</strong> Use high-quality images that clearly show the plant's
-                      characteristics. Avoid images with watermarks or copyrighted content.
+                      <strong>Image Guidelines:</strong> {`Use high-quality images that clearly show the plant's
+                      characteristics. Avoid images with watermarks or copyrighted content.`}
                     </AlertDescription>
                   </Alert>
                 </CardContent>

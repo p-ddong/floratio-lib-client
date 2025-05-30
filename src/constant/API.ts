@@ -21,6 +21,7 @@ export const ENDPOINT_PLANT = {
   detail: "plants/detail",
   families: "plants/families/list",
   attributes: "plants/attributes/list",
+  limitlist: "plants/pagination",
 };
 
 export const ENDPOINT_CONTRIBUTE = {
