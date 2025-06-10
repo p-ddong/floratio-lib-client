@@ -117,7 +117,7 @@ export function PlantDetailView({ plant }: PlantDetailViewProps) {
                 <h3 className="text-lg font-semibold mb-2">Taxonomy</h3>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                   <span className="text-muted-foreground">Family:</span>
-                  <span className="font-medium">{plant.family_name}</span>
+                  <span className="font-medium">{plant.family.name}</span>
                   <span className="text-muted-foreground">Scientific Name:</span>
                   <span className="font-medium italic">{plant.scientific_name}</span>
                 </div>
@@ -126,9 +126,9 @@ export function PlantDetailView({ plant }: PlantDetailViewProps) {
               <div>
                 <h3 className="text-lg font-semibold mb-2">Characteristics</h3>
                 <div className="flex flex-wrap gap-2">
-                  {plant.attributes.map((attribute, index) => (
-                    <Badge key={index} variant="outline" className="bg-primary/10">
-                      {attribute}
+                  {plant.attributes.map((attribute) => (
+                    <Badge key={attribute._id} variant="outline" className="bg-primary/10">
+                      {attribute.name}
                     </Badge>
                   ))}
                 </div>

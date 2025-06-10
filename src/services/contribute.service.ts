@@ -7,10 +7,15 @@ export const fetchContributeList = async (token: string) =>
     headers: { Authorization: `Bearer ${token}` },
   })).data;
 
-export const createContribution = async (payload: FormData, token: string) =>
-  (await axiosInstance.post("/contributes/create", payload, {
-    headers: { Authorization: `Bearer ${token}` },
-  })).data;
+export const createContribution = async (body: FormData, token: string) =>
+  (
+    await axiosInstance.post("/contributes/create", body, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    })
+  ).data;
 
 export const updateContributionStatus = async (
   id: string,

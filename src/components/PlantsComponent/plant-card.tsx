@@ -53,7 +53,7 @@ export function PlantCard({ plant }: PlantCardProps) {
 
         <CardFooter className="p-4 pt-2 flex justify-between">
           <span className="text-sm text-muted-foreground">
-            {plant.family_name}
+            {plant.family}
           </span>
         </CardFooter>
       </Card>

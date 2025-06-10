@@ -1,8 +1,9 @@
 export interface PlantDetail {
   scientific_name: string;
   common_name: string[];
-  family_name: string;
-  attributes: string[];
+  description?: string;
+  family: Family;
+  attributes: Attribute[];
   images: string[];
   species_description: SpeciesSection[];
 }
@@ -20,7 +21,7 @@ export interface SpeciesDetail {
 export interface PlantList {
   _id: string;
   scientific_name: string;
-  family_name: string;
+  family: string;
   image: string;
   common_name: string[];
   attributes: string[];
