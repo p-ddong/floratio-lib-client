@@ -5,15 +5,12 @@ import { ReactNode, useEffect, useRef } from "react"
 import { Provider } from "react-redux"
 import { store, useAppDispatch } from "@/store"
 import {
-  setPlantLoading,
-  setPlantList,
   setAttributesLoading,
   setAttributesList,
   setFamiliesLoading,
   setFamiliesList,
 } from "@/store/plantSlice"
 import {
-  fetchPlantList,
   fetchAttributesList,
   fetchFamiliesList,
 } from "@/services/plant.service"
@@ -29,12 +26,6 @@ function InnerProvider({ children }: ReduxProviderProps) {
   useEffect(() => {
     if (hasFetched.current) return
     hasFetched.current = true
-
-    // Plants
-    dispatch(setPlantLoading(true))
-    fetchPlantList()
-      .then((data) => dispatch(setPlantList(data)))
-      .catch(() => dispatch(setPlantList([])))
 
     // Attributes
     dispatch(setAttributesLoading(true))

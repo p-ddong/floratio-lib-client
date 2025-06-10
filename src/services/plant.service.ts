@@ -31,7 +31,7 @@ export const fetchPlantPagination = async (
   });
 
   const res = await axiosInstance.get<PlantPaginationResponse>(
-    `/plants/pagination?${qs.toString()}`,
+    `plants/pagination?${qs.toString()}`,
   );
   return res.data;
 };

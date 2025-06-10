@@ -73,7 +73,7 @@ if (q) {
           {/* ---------- IMAGE + BADGES ---------- */}
           <div className="relative h-48 w-full">
             <CloudImage
-              src={c.data.plant.images[0] || "/placeholder.svg?height=200&width=400"}
+              src={c.data.plant?.images[0] || "/placeholder.svg?height=200&width=400"}
               alt={c.data.plant.scientific_name}
               className="h-full w-full object-cover"
             />
@@ -112,7 +112,7 @@ if (q) {
             <div className="flex flex-wrap gap-1 mt-3">
               {c.data.plant.attributes.slice(0, 3).map((attr, i) => (
                 <Badge key={i} variant="secondary" className="text-xs">
-                  {attr}
+                  {attr.name}
                 </Badge>
               ))}
               {c.data.plant.attributes.length > 3 && (

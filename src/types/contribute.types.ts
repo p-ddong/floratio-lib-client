@@ -1,5 +1,7 @@
 // src/types/contribution.ts
 
+import { PlantDetail} from "./plant.types";
+
 /** --- User nộp đóng góp ---------------------------------- */
 export interface ContributionUser {
   _id: string;
@@ -18,7 +20,7 @@ export interface ContributionPlant {
 
 /** --- data wrapper --------------------------------------- */
 export interface ContributionData {
-  plant: ContributionPlant;
+  plant: PlantDetail;
   newImages: string[];      // ảnh mới bổ sung (nếu type === "update")
 }
 
@@ -35,4 +37,32 @@ export interface Contribution {
   data: ContributionData;         // 🔸 wrapper chứa plant + newImages
   createdAt: string;
   updatedAt: string;
+}
+
+
+export type ContributeType = "create" | "update";
+
+export interface PlantPayload {
+  scientific_name: string;
+  common_name: string[];
+  description?: string;
+  family: string;          // _id của family
+  attributes: string[];    // _id của attributes
+  species_description: {
+    section: string;
+    details: { label: string; content: string }[];
+  }[];
+  // Nếu BE cho phép gửi url ảnh kèm JSON thì thêm:
+  image_urls?: string[];
+}
+
+export interface ContributeCreateBody {
+  c_message: string;   // mô tả / ghi chú
+  type: ContributeType;
+  data: {
+    plant_ref?: string;  // chỉ cần khi type = "update"
+    plant: PlantPayload;
+  };
+  // Với multipart bạn không khai báo images ở đây –
+  // chúng được gắn riêng trên FormData với key "images"
 }
