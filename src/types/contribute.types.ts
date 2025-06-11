@@ -21,7 +21,7 @@ export interface ContributionPlant {
 /** --- data wrapper --------------------------------------- */
 export interface ContributionData {
   plant: PlantDetail;
-  newImages: string[];      // ảnh mới bổ sung (nếu type === "update")
+  new_images: string[];      // ảnh mới bổ sung (nếu type === "update")
 }
 
 /** --- enum/union helpers --------------------------------- */
@@ -53,7 +53,7 @@ export interface PlantPayload {
     details: { label: string; content: string }[];
   }[];
   // Nếu BE cho phép gửi url ảnh kèm JSON thì thêm:
-  image_urls?: string[];
+  images?: string[];
 }
 
 export interface ContributeCreateBody {

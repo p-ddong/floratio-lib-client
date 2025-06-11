@@ -25,7 +25,7 @@ export function ContributionsList() {
   const dispatch = useAppDispatch();
   const { list, loading } = useAppSelector((s) => s.contribute);
   const token = useAppSelector((s) => s.auth.token);
-
+ 
   // fetch once token ready
   useEffect(() => {
     if (token) dispatch(getContributions());
@@ -73,8 +73,12 @@ if (q) {
           {/* ---------- IMAGE + BADGES ---------- */}
           <div className="relative h-48 w-full">
             <CloudImage
-              src={c.data.plant?.images[0] || "/placeholder.svg?height=200&width=400"}
-              alt={c.data.plant.scientific_name}
+              src={
+                c.data?.plant?.images?.[0] ??
+                c.data?.new_images?.[0] ??
+                "/placeholder.svg?height=200&width=400"
+              }
+              alt={c.data?.plant?.scientific_name ?? "Plant image"}
               className="h-full w-full object-cover"
             />
 
@@ -86,7 +90,10 @@ if (q) {
             {/* type badge (top‑left) */}
             {c.type && (
               <div className="absolute top-2 left-2">
-                <Badge variant="outline" className="bg-background/80 capitalize">
+                <Badge
+                  variant="outline"
+                  className="bg-background/80 capitalize"
+                >
                   {c.type === "create" ? "New Plant" : "Update"}
                 </Badge>
               </div>

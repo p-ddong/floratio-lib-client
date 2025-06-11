@@ -71,5 +71,5 @@ async function PlantDetailContent({ id }: { id: string }) {
     notFound()
   }
   // PlantDetailView là Client Component
-  return <PlantDetailView plant={plant!} />
+  return <PlantDetailView plant={plant!} plantId={id} />
 }
