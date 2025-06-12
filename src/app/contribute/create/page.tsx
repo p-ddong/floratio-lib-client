@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -21,7 +21,7 @@ import { MediaTab } from "../../../components/ContributeComponent/media-tab"
 import { useAppSelector } from "@/store"
 import { buildContributeFormData } from "@/utils/buildContributeFormData";
 import { createContribution } from "@/services/contribute.service";
-import { PlantPayload } from "@/types"
+import { Attribute, PlantPayload } from "@/types"
 import { toast } from "sonner"
 
 const contributionSchema = z.object({
@@ -72,6 +72,8 @@ export default function NewContributionPage() {
   const [previewMode, setPreviewMode] = useState(false)
   const [speciesDescription, setSpeciesDescription] = useState<SpeciesSection[]>([])
   const [uploadedImages, setUploadedImages] = useState<ImageData[]>([])
+  const [existingImages, setExistingImages] = useState<ImageData[]>([])
+  const [plantId, setPlantId] = useState<string>()
 
   const form = useForm<ContributionFormValues>({
     resolver: zodResolver(contributionSchema),
@@ -82,6 +84,54 @@ export default function NewContributionPage() {
       contribution_type: "create",
     },
   })
+
+  // Load plant data if updating
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    console.log(urlParams)
+    const type = urlParams.get("type")
+
+    if (type === "update") {
+      const storedData = sessionStorage.getItem("updatePlantData")
+      if (storedData) {
+        try {
+          const plantData = JSON.parse(storedData);
+
+          // 1. Lấy _id của family
+          const familyId =
+            typeof plantData.family === "string"
+              ? plantData.family
+              : plantData.family?._id ?? "";
+
+          // 2. Lấy mảng _id của attributes
+          const attrIds = (plantData.attributes ?? []).map((a: Attribute) =>
+            typeof a === "string" ? a : a._id
+          );
+
+          // Set form values
+          form.setValue("contribution_type", "update");
+          form.setValue("scientific_name", plantData.scientific_name || "");
+          form.setValue("family", familyId || "");
+
+          // Set other state values
+          setCommonNames(plantData.common_names || []);
+          setAttributes(attrIds || []);
+          setSpeciesDescription(plantData.species_description || []);
+          setPlantId(plantData.plantId)
+
+          // Set existing images for update mode
+          if (plantData.images && plantData.images.length > 0) {
+            setExistingImages(plantData.images);
+          }
+
+          // Clear the stored data
+          // sessionStorage.removeItem("updatePlantData")
+        } catch (error) {
+          console.error("Error loading plant data:", error)
+        }
+      }
+    }
+  }, [form])
 
   const watchedValues = form.watch()
 
@@ -116,6 +166,11 @@ async function onSubmit(data: ContributionFormValues) {
       .filter((img) => img.type === "url" && img.url)
       .map((img) => img.url!);
 
+    // const familyId   = typeof data.family === "string" ? data.family : data.family._id
+    // const attrIds    = attributes.map((a) => (typeof a === "string" ? a : a._id))
+    const imageExist = existingImages.map((image) => image.url)
+    
+
     // Chuẩn bị plant payload
     const plantPayload: PlantPayload = {
       scientific_name: data.scientific_name,
@@ -124,7 +179,7 @@ async function onSubmit(data: ContributionFormValues) {
       family: data.family,
       attributes,
       species_description: speciesDescription,
-      // image_urls chỉ cần nếu BE hỗ trợ
+      images: imageExist.filter((u): u is string => !!u) 
     };
 
     // Build FormData
@@ -132,20 +187,22 @@ async function onSubmit(data: ContributionFormValues) {
       plant: plantPayload,
       message: "Contribute Sample Message Update",
       type: data.contribution_type, // "create" | "update"
-      // plant_ref: (data.contribution_type === "update" ? plantId : undefined),
+      plant_ref: (data.contribution_type === "update" ? plantId : undefined),
       files: imageFiles,
       imageUrls,
     });
-    toast.loading("Submitting contributions…")
 
-    // Gọi API
-    await createContribution(formData,token);
-    toast.success('Create Success')
+    // ----- Gọi API + toast -----
+    await toast.promise(createContribution(formData, token), {
+      loading: "Submitting contributions…",
+      // `res` là dữ liệu resolve từ API, dùng nếu cần
+      success: () => "Create a successful contribution!",
+      error: "Submit contribution failed, please try again.",
+    });
 
     router.push("/contribute?success=true");
   } catch (err) {
     console.error("Error submitting contribution:", err);
-    toast.error("Submit contribution failed, please try again.")
   } finally {
     setIsSubmitting(false);
   }
@@ -182,7 +239,11 @@ async function onSubmit(data: ContributionFormValues) {
         </Button>
         <div className="flex gap-2">
           <Button variant="outline" onClick={saveDraft} disabled={isDraft}>
-            {isDraft ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            {isDraft ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
             Save Draft
           </Button>
           <Button variant="outline" onClick={() => setPreviewMode(true)}>
@@ -196,11 +257,16 @@ async function onSubmit(data: ContributionFormValues) {
         <CardHeader>
           <CardTitle className="text-2xl">Create New Contribution</CardTitle>
           <CardDescription>
-            Share your plant knowledge with the community. All contributions are reviewed before being published.
+            Share your plant knowledge with the community. All contributions are
+            reviewed before being published.
           </CardDescription>
         </CardHeader>
 
-        <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
+        <Tabs
+          value={currentTab}
+          onValueChange={setCurrentTab}
+          className="w-full"
+        >
           <TabsList className="grid w-full grid-cols-4 mb-6 px-6">
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
             <TabsTrigger value="description">Description</TabsTrigger>
@@ -224,7 +290,10 @@ async function onSubmit(data: ContributionFormValues) {
 
               {/* Species Description Tab */}
               <TabsContent value="description">
-                <DescriptionTab speciesDescription={speciesDescription} setSpeciesDescription={setSpeciesDescription} />
+                <DescriptionTab
+                  speciesDescription={speciesDescription}
+                  setSpeciesDescription={setSpeciesDescription}
+                />
               </TabsContent>
 
               {/* Attributes Tab */}
@@ -240,7 +309,13 @@ async function onSubmit(data: ContributionFormValues) {
 
               {/* Media Tab */}
               <TabsContent value="media">
-                <MediaTab uploadedImages={uploadedImages} setUploadedImages={setUploadedImages} />
+                <MediaTab
+                  uploadedImages={uploadedImages}
+                  setUploadedImages={setUploadedImages}
+                  contributionType={watchedValues.contribution_type}
+                  existingImages={existingImages}
+                  setExistingImages={setExistingImages}
+                />
               </TabsContent>
 
               {/* Navigation and Submit */}
@@ -251,10 +326,15 @@ async function onSubmit(data: ContributionFormValues) {
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        const tabs = ["basic", "description", "attributes", "media"]
-                        const currentIndex = tabs.indexOf(currentTab)
+                        const tabs = [
+                          "basic",
+                          "description",
+                          "attributes",
+                          "media",
+                        ];
+                        const currentIndex = tabs.indexOf(currentTab);
                         if (currentIndex > 0) {
-                          setCurrentTab(tabs[currentIndex - 1])
+                          setCurrentTab(tabs[currentIndex - 1]);
                         }
                       }}
                     >
@@ -266,10 +346,15 @@ async function onSubmit(data: ContributionFormValues) {
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        const tabs = ["basic", "description", "attributes", "media"]
-                        const currentIndex = tabs.indexOf(currentTab)
+                        const tabs = [
+                          "basic",
+                          "description",
+                          "attributes",
+                          "media",
+                        ];
+                        const currentIndex = tabs.indexOf(currentTab);
                         if (currentIndex < tabs.length - 1) {
-                          setCurrentTab(tabs[currentIndex + 1])
+                          setCurrentTab(tabs[currentIndex + 1]);
                         }
                       }}
                     >
@@ -279,7 +364,11 @@ async function onSubmit(data: ContributionFormValues) {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button variant="outline" type="button" onClick={() => router.push("/contribute")}>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={() => router.push("/contribute")}
+                  >
                     Cancel
                   </Button>
                   <Button type="submit" disabled={isSubmitting}>
@@ -299,5 +388,5 @@ async function onSubmit(data: ContributionFormValues) {
         </Tabs>
       </Card>
     </div>
-  )
+  );
 }

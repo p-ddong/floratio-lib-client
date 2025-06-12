@@ -14,27 +14,6 @@ interface AttributesTabProps {
   allAttributes: Attribute[] 
 }
 
-const commonAttributes = [
-  "Air Purifying",
-  "Low Light",
-  "Bright Light",
-  "High Humidity",
-  "Low Maintenance",
-  "Pet Safe",
-  "Toxic to Pets",
-  "Trailing",
-  "Climbing",
-  "Succulent",
-  "Tropical",
-  "Drought Tolerant",
-  "Large Leaves",
-  "Small Leaves",
-  "Flowering",
-  "Fragrant",
-  "Fast Growing",
-  "Slow Growing",
-]
-
 export function AttributesTab({ attributes, setAttributes, attributeSearch, setAttributeSearch, allAttributes }: AttributesTabProps) {
   // Filter common attributes based on search
   const filtered = allAttributes.filter((a) =>
@@ -89,8 +68,9 @@ export function AttributesTab({ attributes, setAttributes, attributeSearch, setA
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-2">
+  
             {filtered.length > 0
-              ? `Showing ${filtered.length} of ${commonAttributes.length} attributes • Selected: ${attributes.length}`
+              ? `Showing ${filtered.length} of ${filtered.length} attributes • Selected: ${attributes.length}`
               : `No matches for "${attributeSearch}"`}
           </p>
         </div>

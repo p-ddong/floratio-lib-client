@@ -31,7 +31,7 @@ export function buildContributeFormData(opts: BuildOptions) {
 
   // 3) File images (nhiều ảnh => key trùng "images")
   opts.files.forEach((file) => {
-    formData.append("images", file);    // <-- chính xác key BE yêu cầu
+    formData.append("new_images", file);    // <-- chính xác key BE yêu cầu
   });
 
   return formData;
