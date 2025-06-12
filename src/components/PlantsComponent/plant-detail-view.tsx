@@ -30,6 +30,11 @@ import {
 import { PlantDetail } from "@/types/plant.types";
 import { CloudImage } from "@/components/Common/CloudImage";
 
+import { useAppDispatch, useAppSelector } from "@/store";
+import { addMark as addMarkAction } from "@/store/markSlice";
+import { addMark as addMarkService } from "@/services/mark.service";
+import { toast } from "sonner";
+
 interface PlantDetailViewProps {
   plant: PlantDetail;
   plantId: string
@@ -37,7 +42,39 @@ interface PlantDetailViewProps {
 
 export function PlantDetailView({ plant, plantId }: PlantDetailViewProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isBookmarked, setIsBookmarked] = useState(false);
+
+  const dispatch = useAppDispatch();
+
+  const marks = useAppSelector((s) => s.mark.list);
+  const isMarked = marks.some((m) => m.plant._id === plantId);
+  console.log('mark list:',marks)
+  console.log('is Marked:',isMarked)
+
+  const [markLoading, setMarkLoading] = useState(false);
+
+  const handleCreateMark = async () => {
+  if (markLoading || isMarked) return;           // đã đánh dấu thì thôi
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("token") ?? ""
+      : "";
+
+  if (!token) {
+    toast.error('Please login');
+    return;
+  }
+
+  try {
+    setMarkLoading(true);
+    const newMark = await addMarkService(plantId, token); // gọi API
+    dispatch(addMarkAction(newMark));                     // lưu Redux
+    toast.success(`${plant.scientific_name} đã được thêm vào danh sách.`);
+  } catch {
+    toast.error('Không thể đánh dấu, thử lại sau.');
+  } finally {
+    setMarkLoading(false);
+  }
+};
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % plant.images.length);
@@ -62,10 +99,6 @@ export function PlantDetailView({ plant, plantId }: PlantDetailViewProps) {
   const varietySections = plant.species_description.filter((section) =>
     section.section.toLowerCase().includes("variet")
   );
-
-  const toggleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-  };
 
   const sharePlant = () => {
     console.log(plant.scientific_name)
@@ -99,14 +132,14 @@ export function PlantDetailView({ plant, plantId }: PlantDetailViewProps) {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={toggleBookmark}
+                onClick={handleCreateMark}
                 className={cn(
                   "transition-colors",
-                  isBookmarked &&
+                  isMarked &&
                     "bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100"
                 )}
               >
-                {isBookmarked ? (
+                {isMarked  ? (
                   <BookmarkCheck className="h-4 w-4 fill-current" />
                 ) : (
                   <Bookmark className="h-4 w-4" />
@@ -114,7 +147,7 @@ export function PlantDetailView({ plant, plantId }: PlantDetailViewProps) {
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{isBookmarked ? "Remove bookmark" : "Bookmark this plant"}</p>
+              <p>{isMarked  ? "Remove bookmark" : "Bookmark this plant"}</p>
             </TooltipContent>
           </Tooltip>
           {/* ───── Share ───── */}

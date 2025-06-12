@@ -3,6 +3,7 @@ import authReducer from './authSlice';
 import plantReducer from './plantSlice';
 import contributeReducer from './contributeSlice';
 import userReducer from './userSlice';
+import markReducer from "./markSlice";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux"
 
 export const store = configureStore({
@@ -10,7 +11,8 @@ export const store = configureStore({
     auth: authReducer,
     plant: plantReducer,
     contribute: contributeReducer,
-    user: userReducer, 
+    user: userReducer,
+    mark: markReducer
   },
 });
 

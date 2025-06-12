@@ -14,6 +14,8 @@ import {
   fetchAttributesList,
   fetchFamiliesList,
 } from "@/services/plant.service"
+import { setMarkList, setMarkLoading } from "@/store/markSlice"
+import { fetchMarkList } from "@/services/mark.service"
 
 interface ReduxProviderProps {
   children: ReactNode
@@ -38,7 +40,20 @@ function InnerProvider({ children }: ReduxProviderProps) {
     fetchFamiliesList()
       .then((data) => dispatch(setFamiliesList(data)))
       .catch(() => dispatch(setFamiliesList([])))
+
+    // ===== Marks (cần token) =====
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("token") ?? "" : ""
+
+    if (token) {
+      dispatch(setMarkLoading(true))
+      fetchMarkList(token)
+        .then((data) => dispatch(setMarkList(data)))
+        .catch(() => dispatch(setMarkList([])))
+    }
   }, [dispatch])
+
+    
 
   return <>{children}</>
 }
