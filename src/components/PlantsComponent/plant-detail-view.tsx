@@ -5,7 +5,6 @@ import { useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
-  ExternalLink,
   Edit,
   Bookmark,
   BookmarkCheck,
@@ -33,6 +32,8 @@ import { CloudImage } from "@/components/Common/CloudImage";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { addMark as addMarkAction } from "@/store/markSlice";
 import { addMark as addMarkService } from "@/services/mark.service";
+import { removeMark as removeMarkAction } from "@/store/markSlice";
+import { removeMark as removeMarkService } from "@/services/mark.service";
 import { toast } from "sonner";
 
 interface PlantDetailViewProps {
@@ -47,13 +48,15 @@ export function PlantDetailView({ plant, plantId }: PlantDetailViewProps) {
 
   const marks = useAppSelector((s) => s.mark.list);
   const isMarked = marks.some((m) => m.plant._id === plantId);
+  const mark = marks.find((m) => m.plant._id === plantId);
   console.log('mark list:',marks)
   console.log('is Marked:',isMarked)
+  console.log('Mark:',mark)
 
   const [markLoading, setMarkLoading] = useState(false);
 
   const handleCreateMark = async () => {
-  if (markLoading || isMarked) return;           // đã đánh dấu thì thôi
+  if (markLoading) return;           // đã đánh dấu thì thôi
   const token =
     typeof window !== "undefined"
       ? localStorage.getItem("token") ?? ""
@@ -66,9 +69,17 @@ export function PlantDetailView({ plant, plantId }: PlantDetailViewProps) {
 
   try {
     setMarkLoading(true);
-    const newMark = await addMarkService(plantId, token); // gọi API
-    dispatch(addMarkAction(newMark));                     // lưu Redux
-    toast.success(`${plant.scientific_name} đã được thêm vào danh sách.`);
+    if(isMarked){
+      console.log('remove')
+      await removeMarkService(mark!._id, token)
+      dispatch(removeMarkAction(mark!._id))
+      toast.success(`${plant.scientific_name} đã được xóa vào danh sách.`);
+    }else{
+      console.log('add')
+      const newMark = await addMarkService(plantId, token); // gọi API
+      dispatch(addMarkAction(newMark));                     // lưu Redux
+      toast.success(`${plant.scientific_name} đã được thêm vào danh sách.`);
+    }
   } catch {
     toast.error('Không thể đánh dấu, thử lại sau.');
   } finally {
@@ -136,7 +147,7 @@ export function PlantDetailView({ plant, plantId }: PlantDetailViewProps) {
                 className={cn(
                   "transition-colors",
                   isMarked &&
-                    "bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100"
+                    "bg-blue-50 border-blue-200 text-blue-600 hover:bg-red-200  hover:text-red-500"
                 )}
               >
                 {isMarked  ? (
@@ -219,7 +230,14 @@ export function PlantDetailView({ plant, plantId }: PlantDetailViewProps) {
                 alt={plant.scientific_name}
                 className="object-cover"
               />
-
+              {isMarked && (
+                          <div className="absolute top-2 right-2">
+                            <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-blue-200">
+                              <Bookmark className="h-3 w-3 mr-1 fill-current" />
+                              Bookmarked
+                            </Badge>
+                          </div>
+                        )}
               {/* nút prev / next */}
               {plant.images.length > 1 && (
                 <>
@@ -307,20 +325,6 @@ export function PlantDetailView({ plant, plantId }: PlantDetailViewProps) {
                     </Badge>
                   ))}
                 </div>
-              </div>
-
-              <div className="pt-2">
-                <Button variant="outline" size="sm" className="w-full" asChild>
-                  <a
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center"
-                  >
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    View on Wikipedia
-                  </a>
-                </Button>
               </div>
             </CardContent>
           </Card>

@@ -1,6 +1,6 @@
 // src/types/contribution.ts
 
-import { PlantDetail} from "./plant.types";
+import { SpeciesSection} from "./plant.types";
 
 /** --- User nộp đóng góp ---------------------------------- */
 export interface ContributionUser {
@@ -12,15 +12,16 @@ export interface ContributionUser {
 export interface ContributionPlant {
   scientific_name: string;
   common_name: string[];
-  description: string;
+  description?: string;
   attributes: string[];
   images: string[];         // 🔸 mảng ảnh (cover lấy images[0])
-  family: string;           // 🔸 tên họ thực vật
+  family: string;
+  species_description: SpeciesSection[]           // 🔸 tên họ thực vật
 }
 
 /** --- data wrapper --------------------------------------- */
 export interface ContributionData {
-  plant: PlantDetail;
+  plant: ContributionPlant;
   new_images: string[];      // ảnh mới bổ sung (nếu type === "update")
 }
 

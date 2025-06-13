@@ -19,6 +19,9 @@ import { useAppDispatch } from "@/store"
 import { setToken,setUser } from "@/store/authSlice"              
 import { login as loginService } from "@/services/auth.service" 
 import { JWTPayload } from "@/types"
+import { setMarkList, setMarkLoading } from "@/store/markSlice"
+import { fetchMarkList } from "@/services/mark.service"
+import { getContributions } from "@/store/contributeSlice"
 
 const loginFormSchema = z.object({
   username: z.string().min(1, { message: "Username is required" }),
@@ -52,9 +55,7 @@ export default function LoginPage() {
 
       // 2. Lưu token vào Redux và (nếu nhớ) localStorage
       dispatch(setToken(token))                                    
-      if (data.rememberMe) {
-        localStorage.setItem("token", token)
-      }
+      localStorage.setItem("token", token)
 
       // 3. Decode payload từ token
       const payload = jwtDecode<JWTPayload>(token)
@@ -71,6 +72,13 @@ export default function LoginPage() {
         })
       )
 
+      // Lấy dữ liệu marked
+      dispatch(setMarkLoading(true))
+      fetchMarkList(token)
+        .then((data) => dispatch(setMarkList(data)))
+        .catch(() => dispatch(setMarkList([])))
+      // Lấy dữ liệu contributed
+      dispatch(getContributions())
       // 4. Điều hướng về home
       router.push("/")
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

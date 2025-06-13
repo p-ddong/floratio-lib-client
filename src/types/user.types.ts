@@ -19,4 +19,12 @@ export interface User2 {
   __v?: number;
 }
 
+interface UserProfile {
+  username: string
+  email?: string
+  joinDate?: string
+  location?: string
+  bio?: string
+}
+
 export type UserList = User[];

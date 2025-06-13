@@ -16,9 +16,15 @@ interface Props {
   attributes: Attribute[];
 }
 
+interface FiltersState {
+  search:     string;
+  family:     string;
+  attribute: string[];        // <── đổi thành mảng
+}
+
 export default function PlantsGird({ families, attributes }: Props) {
   /* ---------- filters & phân trang ---------- */
-  const [filters, setFilters]     = useState({ search: "", family: "", attribute: "" });
+  const [filters, setFilters]     = useState<FiltersState>({ search: "", family: "", attribute: [] });
   const [page,    setPage]        = useState(1);
 
   /* ---------- dữ liệu ---------- */
@@ -45,12 +51,12 @@ export default function PlantsGird({ families, attributes }: Props) {
   }, [page, filters, pageSize]);
 
   const handleFilterChange = useCallback(
-  (f: { search: string; family: string; attribute: string }) => {
-    setFilters(f);
-    setPage(1);           // reset về trang đầu khi đổi bộ lọc
-  },
-  []                      // không phụ thuộc state thay đổi liên tục
-);
+    (f: FiltersState) => {
+      setFilters(f);
+      setPage(1);
+    },
+    [],
+  );
 
   useEffect(() => { loadPlants(); }, [loadPlants]);
 

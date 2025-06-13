@@ -28,7 +28,7 @@ export interface PlantFiltersProps {
   onFilterChange: (filters: {
     search: string;
     family: string;
-    attribute: string;
+    attribute: string[];
   }) => void;
 }
 
@@ -39,14 +39,14 @@ export function PlantFilters({
 }: PlantFiltersProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFamily, setSelectedFamily] = useState("");
-  const [selectedAttribute, setSelectedAttribute] = useState("");
+  const [selectedAttribute, setSelectedAttribute] = useState<string[]>([]);
   const [familyOpen, setFamilyOpen] = useState(false);
   const [attributeOpen, setAttributeOpen] = useState(false);
 
   const clearAll = () => {
     setSearchQuery("");
     setSelectedFamily("");
-    setSelectedAttribute("");
+    setSelectedAttribute([]);
   };
 
   // Khi bất kỳ filter nào thay đổi, gọi callback
@@ -58,7 +58,7 @@ export function PlantFilters({
     });
   }, [searchQuery, selectedFamily, selectedAttribute, onFilterChange]);
 
-  const hasActive = !!(searchQuery || selectedFamily || selectedAttribute);
+  const hasActive = !!(searchQuery || selectedFamily || selectedAttribute.length > 0);
 
   return (
     <div className="space-y-4 mb-6">
@@ -151,7 +151,7 @@ export function PlantFilters({
                 className="w-full justify-between"
               >
                 {selectedAttribute
-                  ? attributes.find((a) => a.value === selectedAttribute)?.label
+                  ? `${selectedAttribute.length} selected`
                   : "All attributes"}
                 <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
               </Button>
@@ -162,28 +162,31 @@ export function PlantFilters({
                 <CommandList>
                   <CommandEmpty>No attribute found.</CommandEmpty>
                   <CommandGroup>
-                    {attributes.map((a) => (
-                      <CommandItem
-                        key={a.value}
-                        value={a.value}
-                        onSelect={(val) => {
-                          setSelectedAttribute(
-                            val === selectedAttribute ? "" : val
-                          );
-                          setAttributeOpen(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            selectedAttribute === a.value
-                              ? "opacity-100"
-                              : "opacity-0"
-                          )}
-                        />
-                        {a.label}
-                      </CommandItem>
-                    ))}
+                    {attributes.map((a) => {
+                      const checked = selectedAttribute.includes(a.value);
+                      return (
+                        <CommandItem
+                          key={a.value}
+                          value={a.value}
+                          onSelect={() => {
+                            setSelectedAttribute(
+                              (prev) =>
+                                checked
+                                  ? prev.filter((id) => id !== a.value) // bỏ
+                                  : [...prev, a.value] // thêm
+                            );
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              checked ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {a.label}
+                        </CommandItem>
+                      );
+                    })}
                   </CommandGroup>
                 </CommandList>
               </Command>
@@ -231,21 +234,25 @@ export function PlantFilters({
               </Button>
             </Badge>
           )}
-          {selectedAttribute && (
-            <Badge variant="secondary" className="gap-1">
-              Attribute:{" "}
-              {attributes.find((a) => a.value === selectedAttribute)?.label}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 text-muted-foreground hover:text-foreground"
-                onClick={() => setSelectedAttribute("")}
-              >
-                <X className="h-3 w-3" />
-                <span className="sr-only">Remove attribute filter</span>
-              </Button>
-            </Badge>
-          )}
+          {selectedAttribute.map((id) => {
+            const label = attributes.find((a) => a.value === id)?.label ?? id;
+            return (
+              <Badge key={id} variant="secondary" className="gap-1">
+                {label}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-auto p-0 text-muted-foreground hover:text-foreground"
+                  onClick={() =>
+                    setSelectedAttribute((prev) => prev.filter((v) => v !== id))
+                  }
+                >
+                  <X className="h-3 w-3" />
+                  <span className="sr-only">Remove attribute filter</span>
+                </Button>
+              </Badge>
+            );
+          })}
         </div>
       )}
     </div>

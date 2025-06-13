@@ -29,7 +29,7 @@ export const addMark = async (plantId: string, token: string): Promise<Mark> => 
 // ======================
 // Xóa một mark
 // ======================
-export const deleteMark = async (markId: string, token: string): Promise<void> => {
+export const removeMark = async (markId: string, token: string): Promise<void> => {
   await axiosInstance.delete(`/marks/delete/${markId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
