@@ -19,6 +19,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 import { useAppSelector, useAppDispatch } from "@/store"
 import { clearAuth } from "@/store/authSlice"
+import { clearContributeList } from "@/store/contributeSlice"
+import { setMarkList } from "@/store/markSlice"
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -45,6 +47,8 @@ export function Header() {
   const handleLogout = () => {
     // Xoá token/user khỏi store và localStorage, rồi redirect
     dispatch(clearAuth())
+    dispatch(clearContributeList())
+    dispatch(setMarkList([]))
     localStorage.removeItem("token")
     localStorage.removeItem("userData") // nếu bạn vẫn lưu dự phòng
     router.push("/login")
@@ -89,11 +93,13 @@ export function Header() {
         <div className="flex items-center gap-2">
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  {avatarLetter}
-                </AvatarFallback>
-              </Avatar>
+              <Link href={"/userdetail"}>
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    {avatarLetter}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
               <span className="hidden sm:inline-block font-medium">
                 {username}
               </span>
@@ -147,19 +153,21 @@ export function Header() {
                 {isAuthenticated ? (
                   <div className="mt-4 flex flex-col gap-2">
                     <div className="flex items-center gap-2 py-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-primary text-primary-foreground">
-                          {avatarLetter}
-                        </AvatarFallback>
-                      </Avatar>
+                      <Link href={"/userdetail"}>
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-primary text-primary-foreground">
+                            {avatarLetter}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Link>
                       <span className="font-medium">{username}</span>
                     </div>
                     <Button
                       variant="outline"
                       className="w-full"
                       onClick={() => {
-                        handleLogout()
-                        setIsOpen(false)
+                        handleLogout();
+                        setIsOpen(false);
                       }}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
@@ -184,5 +192,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }

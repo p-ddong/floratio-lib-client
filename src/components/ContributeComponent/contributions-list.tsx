@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -13,8 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useAppDispatch, useAppSelector } from "@/store";
-import { getContributions } from "@/store/contributeSlice";
+import { useAppSelector } from "@/store";
 import { ContributionsListSkeleton } from "./contributions-list-skeleton";
 import { CloudImage } from "@/components/Common/CloudImage";
 import { formatDistanceToNow } from "date-fns";
@@ -22,14 +20,8 @@ import { Eye } from "lucide-react";
 import type { Contribution } from "@/types";
 
 export function ContributionsList() {
-  const dispatch = useAppDispatch();
   const { list, loading } = useAppSelector((s) => s.contribute);
-  const token = useAppSelector((s) => s.auth.token);
- 
-  // fetch once token ready
-  useEffect(() => {
-    if (token) dispatch(getContributions());
-  }, [token, dispatch]);
+  
 
   // read filters from URL
   const params = useSearchParams();
@@ -119,7 +111,7 @@ if (q) {
             <div className="flex flex-wrap gap-1 mt-3">
               {c.data.plant.attributes.slice(0, 3).map((attr, i) => (
                 <Badge key={i} variant="secondary" className="text-xs">
-                  {attr.name}
+                  {attr}
                 </Badge>
               ))}
               {c.data.plant.attributes.length > 3 && (

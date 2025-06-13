@@ -26,12 +26,27 @@ export const fetchPlantPagination = async (
   params: PlantPaginationParams,
 ): Promise<PlantPaginationResponse> => {
   const qs = new URLSearchParams();
-  Object.entries(params).forEach(([k, v]) => {
-    if (v !== undefined && v !== "") qs.append(k, String(v));
+
+  Object.entries(params).forEach(([key, value]) => {
+    // Bỏ qua ➜ undefined · chuỗi rỗng · mảng rỗng
+    if (
+      value === undefined ||
+      value === "" ||
+      (Array.isArray(value) && value.length === 0)
+    ) {
+      return;
+    }
+
+    // Nếu là mảng (attributes) ➜ stringify để backend nhận JSON
+    if (Array.isArray(value)) {
+      qs.append(key, JSON.stringify(value));      // => ["id1","id2"]
+    } else {
+      qs.append(key, String(value));
+    }
   });
 
-  const res = await axiosInstance.get<PlantPaginationResponse>(
+  const { data } = await axiosInstance.get<PlantPaginationResponse>(
     `plants/pagination?${qs.toString()}`,
   );
-  return res.data;
+  return data;
 };

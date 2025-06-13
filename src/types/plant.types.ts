@@ -42,7 +42,7 @@ export interface PlantPaginationParams {
   limit?: number;         // số item / trang
   search?: string;        // chuỗi tìm kiếm
   family?: string;        // _id của family
-  attributes?: string;    // các _id attribute, ngăn cách dấu phẩy
+  attributes?: string[];    // các _id attribute, ngăn cách dấu phẩy
 }
 
 export interface PlantPaginationResponse {

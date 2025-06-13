@@ -19,4 +19,13 @@ export interface User2 {
   __v?: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface UserProfile {
+  username: string
+  email?: string
+  joinDate?: string
+  location?: string
+  bio?: string
+}
+
 export type UserList = User[];
