@@ -52,7 +52,7 @@ function ResultCard({ result }: { result: PlantResult }) {
           <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden">
             <CloudImage
               src={result.image || "/placeholder.svg"}
-              alt={result.common_name[0]}
+              alt={result.common_name[0] || result.scientific_name}
               className="object-cover"
             />
           </div>
@@ -72,7 +72,7 @@ function ResultCard({ result }: { result: PlantResult }) {
                 variant={result.confidence > 90 ? "default" : "secondary"}
                 className="ml-2"
               >
-                {result.confidence}% tin cậy
+                {result.confidence.toFixed(1)}% confidence
               </Badge>
             </div>
 
@@ -94,27 +94,6 @@ function ResultCard({ result }: { result: PlantResult }) {
           </div>
         </div>
 
-        {/* Detail section */}
-        {/* <div className="px-4 pb-4 space-y-3 border-t border-gray-100 pt-4">
-          <div className="flex items-start gap-3">
-            <Info className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
-            <p className="text-gray-700 text-sm">{result.description}</p>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <MapPin className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-            <p className="text-gray-700 text-sm">
-              <strong>Môi trường sống:</strong> {result.habitat}
-            </p>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <Calendar className="w-5 h-5 text-purple-500 mt-0.5 flex-shrink-0" />
-            <p className="text-gray-700 text-sm">
-              <strong>Thời gian ra hoa:</strong> {result.bloomTime}
-            </p>
-          </div>
-        </div> */}
       </CardContent>
     </Card>
     </Link>
@@ -175,11 +154,15 @@ const handleSearch = async () => {
     const plantsPredict = await getPlantsPrediction(scientific_names);
     const confMap = new Map(raw.map(r => [r.name, r.confidence]));
 
-    const result: PlantResult[] = plantsPredict.map(p => ({
-      ...p,
-      confidence: confMap.get(p.scientific_name) ?? 0, 
-    }));
+    const result: PlantResult[] = plantsPredict
+      .map((p) => ({
+        ...p,
+        confidence: Math.round(confMap.get(p.scientific_name) ?? 0), // làm tròn, tùy ý
+      }))
+      .sort((a, b) => b.confidence - a.confidence); // ⬅️ sắp xếp giảm dần
+
     setSearchResults(result);
+
   } catch (err) {
     console.error("Predict error:", err);
     // TODO: toast
