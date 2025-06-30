@@ -36,6 +36,7 @@ interface ContributionPreviewProps {
   attributes: string[]
   speciesDescription: SpeciesSection[]
   uploadedImages: ImageData[]
+  existingImages?: ImageData[]
 
   // Actions
   onBackToEdit: () => void

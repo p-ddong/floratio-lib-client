@@ -1,6 +1,7 @@
 
+import axios from 'axios';
 import axiosInstance from './axiosInstance';
-import { PlantList , Family,Attribute, PlantPaginationParams, PlantPaginationResponse} from '@/types';
+import { PlantList , Family,Attribute, PlantPaginationParams, PlantPaginationResponse, RawPrediction, RawPredictionResponse, PlantsPrediction} from '@/types';
 
 export const fetchPlantList = async (): Promise<PlantList[]> => {
   const res = await axiosInstance.get<PlantList[]>("/plants/list");
@@ -50,3 +51,25 @@ export const fetchPlantPagination = async (
   );
   return data;
 };
+
+export async function fetchPrediction(file: File): Promise<RawPrediction[]> {
+  const form = new FormData();
+  form.append("file", file);            
+
+  const { data } = await axios.post<RawPredictionResponse>(
+    "http://p-ddong.id.vn/predict",
+    form,
+    { headers: { "Content-Type": "multipart/form-data" } }, 
+  );
+  return data.predictions;
+}
+
+export async function getPlantsPrediction(scientific_names: string[]): Promise<PlantsPrediction[]> {            
+
+  const { data } = await axios.post<PlantsPrediction[]>(
+    "https://be-floratio-lib.onrender.com/plants/find-by-names",
+    {scientific_names},
+    { headers: { "Content-Type": "application/json" } }, 
+  );
+  return data;
+}

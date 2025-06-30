@@ -67,3 +67,42 @@ export interface ContributeCreateBody {
   // Với multipart bạn không khai báo images ở đây –
   // chúng được gắn riêng trên FormData với key "images"
 }
+
+// Type Contribution Detail
+export interface ContributionDetail {
+  _id: string
+  c_user: {
+    _id: string
+    username: string
+  }
+  c_message: string
+  type: ContributionType
+  status: ContributionStatus
+  data: {
+    plant: {
+      _id: string
+      scientific_name: string
+      common_name: string[]
+      description: string
+      family: {
+        _id: string
+        name: string
+      }
+      attributes: Array<{
+        _id: string
+        name: string
+      }>
+      images: string[]
+      species_description: Array<{
+        section: string
+        details: Array<{
+          label: string
+          content: string
+        }>
+      }>
+    }
+    new_images?: string[]
+  }
+  createdAt: string
+  updatedAt: string
+}

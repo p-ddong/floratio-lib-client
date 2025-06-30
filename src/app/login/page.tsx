@@ -53,7 +53,7 @@ export default function LoginPage() {
       // 1. Gọi API đăng nhập, lấy access token
       const token = await loginService(data.username, data.password)    
 
-      // 2. Lưu token vào Redux và (nếu nhớ) localStorage
+      // 2. Lưu token vào Redux và localStorage
       dispatch(setToken(token))                                    
       localStorage.setItem("token", token)
 
