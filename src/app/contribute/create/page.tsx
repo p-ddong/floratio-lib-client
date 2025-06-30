@@ -190,6 +190,7 @@ async function onSubmit(data: ContributionFormValues) {
       plant_ref: (data.contribution_type === "update" ? plantId : undefined),
       files: imageFiles,
       imageUrls,
+      mode: "create"
     });
 
     // ----- Gọi API + toast -----

@@ -52,3 +52,20 @@ export interface PlantPaginationResponse {
   totalItems:  number;
   data:        PlantList[];
 }
+
+export interface RawPrediction {
+  id: string;
+  name: string;        // scientific_name
+  confidence: number;
+}
+
+export interface RawPredictionResponse {
+  predictions: RawPrediction[];
+}
+
+export interface PlantsPrediction {
+  _id: string;
+  scientific_name: string;
+  common_name: string[];
+  image: string;
+}

@@ -11,6 +11,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { signup } from "@/services/auth.service"
+
+interface SignupDto {
+  username: string;
+  email: string;
+  password: string;
+  roleName: "user";
+}
 
 const registerFormSchema = z
   .object({
@@ -18,9 +26,9 @@ const registerFormSchema = z
     email: z.string().email({ message: "Please enter a valid email address" }),
     password: z.string().min(8, { message: "Password must be at least 8 characters" }),
     confirmPassword: z.string(),
-    terms: z.boolean().refine((val) => val === true, {
-      message: "You must agree to the terms and conditions",
-    }),
+    // terms: z.boolean().refine((val) => val === true, {
+    //   message: "You must agree to the terms and conditions",
+    // }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -41,24 +49,33 @@ export default function RegisterPage() {
       email: "",
       password: "",
       confirmPassword: "",
-      terms: false,
+      // terms: false,
     },
   })
 
-  async function onSubmit(data: RegisterFormValues) {
-    setIsLoading(true)
+async function onSubmit(data: RegisterFormValues) {
+  setIsLoading(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+  const dto: SignupDto = {
+    username: data.name.trim(),     // đảm bảo không rỗng
+    email: data.email.trim(),
+    password: data.password,
+    roleName: "user",
+  };
 
-    console.log(data)
-    setIsLoading(false)
-
-    // Here you would typically:
-    // 1. Send the data to your registration API
-    // 2. Store the returned token
-    // 3. Redirect the user to the dashboard or verification page
+  try {
+    const user = await signup(dto);
+    console.log("Signup success:", user);
+    // TODO: lưu token, điều hướng…
+  } catch (err) {
+    console.error(err);
+    // TODO: toast lỗi
+  } finally {
+    setIsLoading(false);
   }
+}
+
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
@@ -83,7 +100,7 @@ export default function RegisterPage() {
                   </FormItem>
                 )}
               />
-              {/* <FormField
+              <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
@@ -95,7 +112,7 @@ export default function RegisterPage() {
                     <FormMessage />
                   </FormItem>
                 )}
-              /> */}
+              />
               <FormField
                 control={form.control}
                 name="password"

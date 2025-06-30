@@ -35,6 +35,7 @@ import { addMark as addMarkService } from "@/services/mark.service";
 import { removeMark as removeMarkAction } from "@/store/markSlice";
 import { removeMark as removeMarkService } from "@/services/mark.service";
 import { toast } from "sonner";
+import Link from "next/link";
 
 interface PlantDetailViewProps {
   plant: PlantDetail;
@@ -175,38 +176,40 @@ export function PlantDetailView({ plant, plantId }: PlantDetailViewProps) {
           {/* ───── Update Plant ───── */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  const plantData = {
-                    scientific_name: plant.scientific_name,
-                    family: plant.family,
-                    common_names: plant.common_name,
-                    attributes: plant.attributes,
-                    images: plant.images.map((img, index) => ({
-                      id: `existing-${index}`,
-                      type: "url" as const,
-                      url: img,
-                      preview: img,
-                      name: `${plant.scientific_name} - Image ${index + 1}`,
-                    })),
-                    species_description: plant.species_description,
-                  };
+              <Link href={'/contribute/create?type=update'}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const plantData = {
+                      scientific_name: plant.scientific_name,
+                      family: plant.family,
+                      common_names: plant.common_name,
+                      attributes: plant.attributes,
+                      images: plant.images.map((img, index) => ({
+                        id: `existing-${index}`,
+                        type: "url" as const,
+                        url: img,
+                        preview: img,
+                        name: `${plant.scientific_name} - Image ${index + 1}`,
+                      })),
+                      species_description: plant.species_description,
+                    };
 
-                  // Lưu dữ liệu vào sessionStorage cho form contribution
-                  sessionStorage.setItem(
-                    "updatePlantData",
-                    JSON.stringify({...plantData,plantId})
-                  );
+                    // Lưu dữ liệu vào sessionStorage cho form contribution
+                    sessionStorage.setItem(
+                      "updatePlantData",
+                      JSON.stringify({...plantData,plantId})
+                    );
 
-                  // Điều hướng sang trang đóng góp ở chế độ update
-                  window.location.href = "/contribute/create?type=update";
-                }}
-                className="flex items-center gap-2"
-              >
-                <Edit className="h-4 w-4" />
-                Update Plant
-              </Button>
+                    // Điều hướng sang trang đóng góp ở chế độ update
+                    // window.location.href = "/contribute/create?type=update";
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Edit className="h-4 w-4" />
+                  Update Plant
+                </Button>
+              </Link>
             </TooltipTrigger>
             <TooltipContent>
               <p>Suggest updates to this plant</p>

@@ -2,6 +2,7 @@
 import type { PlantPayload } from "@/types/contribute.types";
 
 interface BuildOptions {
+  mode: "create" | "update";
   plant: PlantPayload;
   message: string;
   type: "create" | "update";

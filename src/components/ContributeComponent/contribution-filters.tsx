@@ -1,48 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import type { ContributionStatus, ContributionType } from "@/types";
 
-export interface ContributionFiltersProps {
-  /** Optional callback khi filter thay đổi */
-  onChange?: (filters: {
-    status: ContributionStatus | "all";
-    type: ContributionType | "all";
-    search: string;
-  }) => void;
-}
+export function ContributionFilters() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [, startTransition] = useTransition();
 
-export function ContributionFilters({ onChange }: ContributionFiltersProps) {
-  const [status, setStatus] = useState<ContributionStatus | "all">("all");
-  const [type, setType] = useState<ContributionType | "all">("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  /* ---------- local state (khởi tạo từ URL để đồng bộ) ---------- */
+  const [status, setStatus] = useState<ContributionStatus | "all">(
+    (searchParams.get("status") as ContributionStatus) ?? "all"
+  );
+  const [type, setType] = useState<ContributionType | "all">(
+    (searchParams.get("type") as ContributionType) ?? "all"
+  );
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get("q") ?? ""
+  );
 
-  // notify parent if needed
-  const emit = (
-    next: Partial<{ status: string; type: string; search: string }> = {}
-  ) => {
-    const current = {
-      status,
-      type,
-      search: searchQuery,
-      ...next,
-    } as {
-      status: ContributionStatus | "all";
-      type: ContributionType | "all";
-      search: string;
-    };
-    onChange?.(current);
+  /* -------------------------------------------------------------- */
+  /** Ghi đè (hoặc xóa) param rồi push lên URL */
+  const updateURL = (next: Partial<{ status: string; type: string; q: string }>) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (next.status !== undefined) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      next.status === "all" ? params.delete("status") : params.set("status", next.status);
+    }
+    if (next.type !== undefined) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      next.type === "all" ? params.delete("type") : params.set("type", next.type);
+    }
+    if (next.q !== undefined) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      next.q.trim() ? params.set("q", next.q.trim()) : params.delete("q");
+    }
+
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    });
   };
 
+  /* -------------------------------------------------------------- */
   return (
     <div className="space-y-4">
-      {/* ---------- Search & Type buttons ---------- */}
+      {/* ---------- Search + Type ---------- */}
       <div className="flex flex-col sm:flex-row gap-4">
-        {/* search */}
+        {/* search box */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -50,64 +61,46 @@ export function ContributionFilters({ onChange }: ContributionFiltersProps) {
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
-              emit({ search: e.target.value });
+              updateURL({ q: e.target.value });
             }}
             className="pl-10"
           />
         </div>
 
-        {/* type */}
+        {/* type buttons */}
         <div className="flex gap-2">
-          <Button
-            variant={type === "all" ? "default" : "outline"}
-            size="sm"
-            onClick={() => {
-              setType("all");
-              emit({ type: "all" });
-            }}
-            className="flex-1 sm:flex-none"
-          >
-            All Types
-          </Button>
-          <Button
-            variant={type === "create" ? "default" : "outline"}
-            size="sm"
-            onClick={() => {
-              setType("create");
-              emit({ type: "create" });
-            }}
-            className="flex-1 sm:flex-none"
-          >
-            New Plants
-          </Button>
-          <Button
-            variant={type === "update" ? "default" : "outline"}
-            size="sm"
-            onClick={() => {
-              setType("update");
-              emit({ type: "update" });
-            }}
-            className="flex-1 sm:flex-none"
-          >
-            Updates
-          </Button>
+          {(["all", "create", "update"] as const).map((t) => (
+            <Button
+              key={t}
+              variant={type === t ? "default" : "outline"}
+              size="sm"
+              onClick={() => {
+                setType(t);
+                updateURL({ type: t });
+              }}
+              className="flex-1 sm:flex-none capitalize"
+            >
+              {t === "all" ? "All Types" : t === "create" ? "New Plants" : "Updates"}
+            </Button>
+          ))}
         </div>
       </div>
 
       {/* ---------- Status tabs ---------- */}
       <Tabs
-        defaultValue="all"
+        value={status}
         className="w-full"
-        onValueChange={(value) => {
-          setStatus(value as ContributionStatus | "all");
-          emit({ status: value });
+        onValueChange={(val) => {
+          setStatus(val as ContributionStatus | "all");
+          updateURL({ status: val });
         }}
       >
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="pending">Pending</TabsTrigger>
-          <TabsTrigger value="approved">Approved</TabsTrigger>
-          <TabsTrigger value="rejected">Rejected</TabsTrigger>
+          {(["all", "pending", "approved", "rejected"] as const).map((s) => (
+            <TabsTrigger key={s} value={s} className="capitalize">
+              {s}
+            </TabsTrigger>
+          ))}
         </TabsList>
       </Tabs>
     </div>
