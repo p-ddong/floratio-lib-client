@@ -57,7 +57,7 @@ export async function fetchPrediction(file: File): Promise<RawPrediction[]> {
   form.append("file", file);            
 
   const { data } = await axios.post<RawPredictionResponse>(
-    "http://p-ddong.id.vn/predict",
+    "https://p-ddong.id.vn/predict",
     form,
     { headers: { "Content-Type": "multipart/form-data" } }, 
   );
